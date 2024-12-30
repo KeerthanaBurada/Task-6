@@ -10,6 +10,7 @@ Project: HOSPITAL MANAGEMENT SYSTEM.
 The Hospital Management System (HMS) is a Java-based application with a GUI built using Swing. It streamlines hospital operations by managing patients, appointments, billing, inventory, and staff.
 
 Key Modules
+
 Patient Management:
 
 Register and view patient details.
