@@ -6,7 +6,7 @@ Intern: CODTECH
 Duration: December 12, 2024- January 12, 2025
 
 OVERVIEW OF THE PROJECT
-Project: HOSPITAL MANAGEMENT SYSTEM
+Project: HOSPITAL MANAGEMENT SYSTEM.
 The Hospital Management System (HMS) is a Java-based application with a GUI built using Swing. It streamlines hospital operations by managing patients, appointments, billing, inventory, and staff.
 
 Key Modules
