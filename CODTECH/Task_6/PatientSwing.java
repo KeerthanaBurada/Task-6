@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.GridLayout;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class PatientSwing {
@@ -15,28 +16,11 @@ public class PatientSwing {
         addPatientButton.addActionListener(e -> addPatient());
         viewPatientsButton.addActionListener(e -> viewPatients());
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(2, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(2, 1, 10, 10));
         panel.add(addPatientButton);
         panel.add(viewPatientsButton);
 
         frame.add(panel);
-        frame.setVisible(true);
-    }
-
-    public static void showEHRViewer() {
-        JFrame frame = new JFrame("View EHR");
-        frame.setSize(400, 300);
-
-        StringBuilder ehr = new StringBuilder();
-        for (Patient patient : patientList) {
-            ehr.append(patient).append("\n");
-        }
-
-        JTextArea ehrArea = new JTextArea(ehr.toString());
-        JScrollPane scrollPane = new JScrollPane(ehrArea);
-
-        frame.add(scrollPane);
         frame.setVisible(true);
     }
 
@@ -55,20 +39,30 @@ public class PatientSwing {
             int age = Integer.parseInt(ageField.getText());
             String gender = genderField.getText();
             String contact = contactField.getText();
+
+            // ====== SQL INSERT ======
+            try (Connection con = DBConnection.getConnection()) {
+                String sql = "INSERT INTO Patient(name, age, gender, contact) VALUES(?, ?, ?, ?)";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setString(1, name);
+                ps.setInt(2, age);
+                ps.setString(3, gender);
+                ps.setString(4, contact);
+                ps.executeUpdate();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             patientList.add(new Patient(name, age, gender, contact));
             JOptionPane.showMessageDialog(frame, "Patient added successfully!");
             frame.dispose();
         });
 
         JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
-        panel.add(new JLabel("Name:"));
-        panel.add(nameField);
-        panel.add(new JLabel("Age:"));
-        panel.add(ageField);
-        panel.add(new JLabel("Gender:"));
-        panel.add(genderField);
-        panel.add(new JLabel("Contact:"));
-        panel.add(contactField);
+        panel.add(new JLabel("Name:")); panel.add(nameField);
+        panel.add(new JLabel("Age:")); panel.add(ageField);
+        panel.add(new JLabel("Gender:")); panel.add(genderField);
+        panel.add(new JLabel("Contact:")); panel.add(contactField);
         panel.add(saveButton);
 
         frame.add(panel);
@@ -79,9 +73,21 @@ public class PatientSwing {
         JFrame frame = new JFrame("View Patients");
         frame.setSize(400, 300);
 
+        // ====== SQL SELECT ======
         StringBuilder patientData = new StringBuilder();
-        for (Patient patient : patientList) {
-            patientData.append(patient).append("\n");
+        try (Connection con = DBConnection.getConnection()) {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Patient");
+            while (rs.next()) {
+                patientData.append("ID: ").append(rs.getInt("patient_id"))
+                        .append(", Name: ").append(rs.getString("name"))
+                        .append(", Age: ").append(rs.getInt("age"))
+                        .append(", Gender: ").append(rs.getString("gender"))
+                        .append(", Contact: ").append(rs.getString("contact"))
+                        .append("\n");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         JTextArea textArea = new JTextArea(patientData.toString());
@@ -110,3 +116,4 @@ class Patient {
         return "Name: " + name + ", Age: " + age + ", Gender: " + gender + ", Contact: " + contact;
     }
 }
+
